@@ -26,9 +26,9 @@ import adb_commands as commands
 
 
 # path to adb (home)
-# path = "P:\\adb\\platform-tools"
+path = "P:\\adb\\platform-tools"
 # path to adb (work)
-path = "C:\\bin\\adb\\platform-tools"
+# path = "C:\\bin\\adb\\platform-tools"
 
 # Change the directory to it.
 
@@ -54,12 +54,12 @@ print("\n Your report for " + pid + " is being generated")
 # read adb for 1 minute
 t_end = time.time() + 50
 
-#gfx_thread = multiprocessing.Process(target=commands.gfxinfo, args=(t_end,pid,),)
+#gfx_thread = multiprocessing.Process(target=commands.gfxhistinfo, args=(t_end,pid,),)
 #bat_thread = multiprocessing.Process(target=commands.battery, args=(t_end,pid),)
 #top_thread = multiprocessing.Process(target=commands.top, args=(t_end,pid,),)
 #mem_thread = multiprocessing.Process(target=commands.meminfo, args=(t_end,pid),)
 # ---------------------------
-gfx_thread = threading.Thread(target=commands.gfxinfo, args=(t_end,pid))
+gfx_thread = threading.Thread(target=commands.gfxhistinfo, args=(t_end,pid))
 bat_thread = threading.Thread(target=commands.battery, args=(t_end,pid))
 top_thread = threading.Thread(target=commands.top, args=(t_end,pid))
 #mem_thread = threading.Thread(target=commands.meminfo, args=(t_end,pid))

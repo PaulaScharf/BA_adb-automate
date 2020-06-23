@@ -12,13 +12,13 @@ import csv
 
 import re
 
-# This is for adb shell dumpsys gfxinfo. Records data for the metric "render time"
-def gfxinfo(t_end, pid):
+# This is for the profiledata produced by adb shell dumpsys gfxinfo. Records data for the metric "render time"
+def gfxframestatsinfo(t_end, pid):
     print("\n collecting data for metric 'render time'...")
     lastRow = -1
-    
+    os.popen("adb shell dumpsys gfxinfo '" + pid + "' reset")
     # read adb for 1 minute
-    t_end = time.time() + 50
+    t_end = time.time() + 100
     
     with open('output_gfx.csv', mode='w') as output:
         csv_writer = csv.writer(output, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -30,14 +30,31 @@ def gfxinfo(t_end, pid):
                 framestats_split = i.split(',')
                 if i != '' and framestats_split[0] != 'Flags' and int(framestats_split[1]) > lastRow:
                     csv_writer.writerow(framestats_split)
-                    
+                    print(framestats_split)
             framestats_split = framestats[-2].split(',')
             if i != '' and framestats_split[0] != 'Flags' and int(framestats_split[1]) > lastRow:
                 csv_writer.writerow(framestats_split)
-            lastRow = int(framestats[-2].split(',')[1])
-            #csv_writer.writerow([0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0,0])
+                print(framestats_split)
+                lastRow = int(framestats_split[1])
      
-            
+ # This is for the histogram produced by adb shell dumpsys gfxinfo. Records data for the metric "render time"           
+def gfxhistinfo(t_end, pid):
+    print("\n collecting data for metric 'render time'...")
+    with open('output_gfx.csv', mode='w') as output:
+        csv_writer = csv.writer(output, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        csv_writer.writerow(['ms','number of frames'])
+        
+        os.popen("adb shell dumpsys gfxinfo '" + pid + "' reset")
+        # read adb for 1 minute
+        time.sleep(5*60)
+    
+        hist = os.popen("adb shell dumpsys gfxinfo '" + pid + "' framestats | findstr HISTOGRAM:").read().split('HISTOGRAM: ')[1].split(' ')
+        for i in hist:
+            curHistSplit = i.split('ms=')
+            csv_writer.writerow(curHistSplit)
+        
+        
+        
 # This is for adb shell dumpsys battery. Records data for the metric "battery usage"
 def battery(t_end, pid):
     print("\n collecting data for metric 'battery usage'...")
@@ -59,19 +76,19 @@ def top(t_end, pid):
     print("\n collecting data for metric 'memory usage' and 'cpu usage'...")
     
     # read adb for 1 minute
-    t_end = time.time() + 50
+    t_end = time.time() + 5*60
     with open('output_top.csv', mode='w') as output:
         csv_writer = csv.writer(output, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         csv_writer.writerow(['time', '%CPU-user', '%CPU-nice', '%CPU-sys', '%MEM'])
         
         topPID = os.popen('adb shell top | findstr "cpu Mem"').read().split(' ')
         topPID_clean = list(filter(None, topPID))
-        csv_writer.writerow([time.time(), topPID_clean[10], topPID_clean[11], topPID_clean[12], topPID_clean[3]])
+        csv_writer.writerow([time.time(), topPID_clean[10][:-5], topPID_clean[11][:-4], topPID_clean[12][:-5], topPID_clean[3][:-1]])
         while time.time() < t_end:
             time.sleep(1)
             topPID = os.popen('adb shell top | findstr "cpu Mem"').read().split(' ')
             topPID_clean = list(filter(None, topPID))
-            csv_writer.writerow([time.time(), topPID_clean[10], topPID_clean[11], topPID_clean[12], topPID_clean[3]])
+            csv_writer.writerow([time.time(), topPID_clean[10][:-5], topPID_clean[11][:-4], topPID_clean[12][:-5], topPID_clean[3][:-1]])
 
 
 # This is for adb shell dumpsys meminfo. Could be used additionally for the
