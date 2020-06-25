@@ -26,9 +26,9 @@ import adb_commands as commands
 
 
 # path to adb (home)
-path = "P:\\adb\\platform-tools"
+# path = "P:\\adb\\platform-tools"
 # path to adb (work)
-# path = "C:\\bin\\adb\\platform-tools"
+path = "C:\\bin\\adb\\platform-tools"
 
 # Change the directory to it.
 
@@ -62,14 +62,17 @@ t_end = time.time() + 50
 gfx_thread = threading.Thread(target=commands.gfxhistinfo, args=(t_end,pid))
 bat_thread = threading.Thread(target=commands.battery, args=(t_end,pid))
 top_thread = threading.Thread(target=commands.top, args=(t_end,pid))
+topI_thread = threading.Thread(target=commands.topIndividual, args=(t_end,pid))
 #mem_thread = threading.Thread(target=commands.meminfo, args=(t_end,pid))
 
-gfx_thread.start()
+#gfx_thread.start()
 bat_thread.start()
 top_thread.start()
+topI_thread.start()
 #mem_thread.start()
 
-gfx_thread.join()
+#gfx_thread.join()
 bat_thread.join()
 top_thread.join()
+topI_thread.join()
 #mem_thread.join()

@@ -46,7 +46,7 @@ def gfxhistinfo(t_end, pid):
         
         os.popen("adb shell dumpsys gfxinfo '" + pid + "' reset")
         # read adb for 1 minute
-        time.sleep(5*60)
+        time.sleep(2*60)
     
         hist = os.popen("adb shell dumpsys gfxinfo '" + pid + "' framestats | findstr HISTOGRAM:").read().split('HISTOGRAM: ')[1].split(' ')
         for i in hist:
@@ -64,7 +64,7 @@ def battery(t_end, pid):
         csv_writer.writerow(['Start','End', 'Difference'])
         
         battery_start = re.search('level: (.*)\n',os.popen("adb shell dumpsys battery | findstr level").read()).group(1)
-        time.sleep(5*60)    
+        time.sleep(2*60)    
         battery_end = re.search('level: (.*)\n',os.popen("adb shell dumpsys battery | findstr level").read()).group(1)
         
         csv_writer.writerow([battery_start, battery_end, int(battery_start)-int(battery_end)])
@@ -73,22 +73,42 @@ def battery(t_end, pid):
 # This is for adb shell top. Records data for the metrics "cpu usage" and
 # and "memory usage"
 def top(t_end, pid):
-    print("\n collecting data for metric 'memory usage' and 'cpu usage'...")
+    print("\n collecting overall data for metric 'memory usage' and 'cpu usage'...")
     
     # read adb for 1 minute
-    t_end = time.time() + 5*60
+    t_end = time.time() + 2*60
     with open('output_top.csv', mode='w') as output:
         csv_writer = csv.writer(output, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         csv_writer.writerow(['time', '%CPU-user', '%CPU-nice', '%CPU-sys', '%MEM'])
         
         topPID = os.popen('adb shell top | findstr "cpu Mem"').read().split(' ')
         topPID_clean = list(filter(None, topPID))
-        csv_writer.writerow([time.time(), topPID_clean[10][:-5], topPID_clean[11][:-4], topPID_clean[12][:-5], topPID_clean[3][:-1]])
+        csv_writer.writerow([time.time(), topPID_clean[9][:-5], topPID_clean[10][:-5], topPID_clean[11][:-4], topPID_clean[3][:-1]])
         while time.time() < t_end:
             time.sleep(1)
             topPID = os.popen('adb shell top | findstr "cpu Mem"').read().split(' ')
             topPID_clean = list(filter(None, topPID))
-            csv_writer.writerow([time.time(), topPID_clean[10][:-5], topPID_clean[11][:-4], topPID_clean[12][:-5], topPID_clean[3][:-1]])
+            csv_writer.writerow([time.time(), topPID_clean[9][:-5], topPID_clean[10][:-5], topPID_clean[11][:-4], topPID_clean[3][:-1]])
+            
+# This is for adb shell top. Records data for the metrics "cpu usage" and
+# and "memory usage"
+def topIndividual(t_end, pid):
+    print("\n collecting process specific data for metric 'memory usage' and 'cpu usage'...")
+    
+    # read adb for 1 minute
+    t_end = time.time() + 2*60
+    with open('output_top_'+ pid +'.csv', mode='w') as output:
+        csv_writer = csv.writer(output, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        csv_writer.writerow(['time', 'CPU', 'MEM'])
+        
+        topPID = os.popen('adb shell top -p ' + pid + ' | findstr "' + pid + '"').read().split(' ')
+        topPID_clean = list(filter(None, topPID))
+        csv_writer.writerow([time.time(), topPID_clean[8], topPID_clean[9]])
+        while time.time() < t_end:
+            time.sleep(1)
+            topPID = os.popen('adb shell top -p ' + pid + ' | findstr "' + pid + '"').read().split(' ')
+            topPID_clean = list(filter(None, topPID))
+            csv_writer.writerow([time.time(), topPID_clean[8], topPID_clean[9]])
 
 
 # This is for adb shell dumpsys meminfo. Could be used additionally for the
