@@ -53,8 +53,20 @@ def gfxhistinfo(t_end, pid):
             curHistSplit = i.split('ms=')
             csv_writer.writerow(curHistSplit)
         
-        
-        
+def gpuUtilization(t_end,pid):
+    print("\n collecting data for metric 'gpu usage'...")
+   # read adb for 1 minute
+    t_end = time.time() + 2*60
+    with open('output_gpuUtil.csv', mode='w') as output:
+        csv_writer = csv.writer(output, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        csv_writer.writerow(['ms','%Usage'])
+    
+        gpuUse = os.popen("adb shell cat /sys/class/misc/mali0/device/utilization").read()
+        csv_writer.writerow([time.time(), gpuUse[:-1]])
+        while time.time() < t_end:
+            gpuUse = os.popen("adb shell cat /sys/class/misc/mali0/device/utilization").read()
+            csv_writer.writerow([time.time(), gpuUse[:-1]])
+            
 # This is for adb shell dumpsys battery. Records data for the metric "battery usage"
 def battery(t_end, pid):
     print("\n collecting data for metric 'battery usage'...")
