@@ -13,7 +13,7 @@ import csv
 import re
 
 # This is for the profiledata produced by adb shell dumpsys gfxinfo. Records data for the metric "render time"
-def gfxframestatsinfo(t_end, pid):
+def gfxframestatsinfo(pid):
     print("\n collecting data for metric 'render time'...")
     lastRow = -1
     os.popen("adb shell dumpsys gfxinfo '" + pid + "' reset")
@@ -38,7 +38,7 @@ def gfxframestatsinfo(t_end, pid):
                 lastRow = int(framestats_split[1])
      
  # This is for the histogram produced by adb shell dumpsys gfxinfo. Records data for the metric "render time"           
-def gfxhistinfo(t_end, pid):
+def gfxhistinfo(pid):
     print("\n collecting data for metric 'render time'...")
     with open('output_gfx.csv', mode='w') as output:
         csv_writer = csv.writer(output, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -53,7 +53,7 @@ def gfxhistinfo(t_end, pid):
             curHistSplit = i.split('ms=')
             csv_writer.writerow(curHistSplit)
         
-def gpuUtilization(t_end,pid):
+def gpuUtilization(pid):
     print("\n collecting data for metric 'gpu usage'...")
    # read adb for 1 minute
     t_end = time.time() + 2*60
@@ -68,7 +68,7 @@ def gpuUtilization(t_end,pid):
             csv_writer.writerow([time.time(), gpuUse[:-1]])
             
 # This is for adb shell dumpsys battery. Records data for the metric "battery usage"
-def battery(t_end, pid):
+def battery(pid):
     print("\n collecting data for metric 'battery usage'...")
     
     with open('output_battery.csv', mode='w') as output:
@@ -84,7 +84,7 @@ def battery(t_end, pid):
     
 # This is for adb shell top. Records data for the metrics "cpu usage" and
 # and "memory usage"
-def top(t_end, pid):
+def top(pid):
     print("\n collecting overall data for metric 'memory usage' and 'cpu usage'...")
     
     # read adb for 1 minute
@@ -104,7 +104,7 @@ def top(t_end, pid):
             
 # This is for adb shell top. Records data for the metrics "cpu usage" and
 # and "memory usage"
-def topIndividual(t_end, pid):
+def topIndividual(pid):
     print("\n collecting process specific data for metric 'memory usage' and 'cpu usage'...")
     
     # read adb for 1 minute
@@ -125,7 +125,9 @@ def topIndividual(t_end, pid):
 
 # This is for adb shell dumpsys meminfo. Could be used additionally for the
 # metric "memory usage"
-def meminfo(t_end, pid):
+def meminfo(pid):
+    # read adb for 1 minute
+    t_end = time.time() + 2*60
     print("pss: ")
     while time.time() < t_end:
         time.sleep(1)
